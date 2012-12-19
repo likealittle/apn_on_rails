@@ -22,6 +22,10 @@ class APN::Notification < APN::Base
   belongs_to :device, :class_name => 'APN::Device'
   has_one    :app,    :class_name => 'APN::App', :through => :device
   
+  # validations
+  validates_presence_of :app_id
+  validates_presence_of :device_id
+
   # Stores the text alert message you want to send to the device.
   # 
   # If the message is over 150 characters long it will get truncated

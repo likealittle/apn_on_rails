@@ -14,8 +14,8 @@ class APN::Device < APN::Base
   has_many :notifications, :class_name => 'APN::Notification'
   has_many :unsent_notifications, :class_name => 'APN::Notification', :conditions => 'sent_at is null'
   
-  validates_uniqueness_of :token, :scope => :app_id
-  validates_format_of :token, :with => /^[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}$/
+  validates_uniqueness_of :token, :scope => :app_id, :allow_blank => true, :allow_nil => true
+  validates_format_of :token, :with => /^[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}\s[a-z0-9]{8}$/, :if => Proc.new { |device| device.token.length > 0 }
   
   before_create :set_last_registered_at
   
@@ -30,11 +30,11 @@ class APN::Device < APN::Base
   #  '<5gxadhy6 6zmtxfl6 5zpbcxmw ez3w7ksf qscpr55t trknkzap 7yyt45sc g6jrw7qz>'
   # Then the '<' and '>' will be stripped off.
   def token=(token)
-    res = token.scan(/\<(.+)\>/).first
-    unless res.nil? || res.empty?
-      token = res.first
+    if token
+      res = token.scan(/\<(.+)\>/).first
+      token = res.first unless res.nil? || res.empty?
+      write_attribute('token', token)
     end
-    write_attribute('token', token)
   end
   
   # Returns the hexadecimal representation of the device's token.
